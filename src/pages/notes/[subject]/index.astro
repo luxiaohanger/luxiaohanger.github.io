@@ -1,0 +1,39 @@
+---
+import BasePage from '../../../layouts/BasePage.astro';
+import NoteTree from '../../../components/NoteTree.astro';
+import { getCollection } from 'astro:content';
+import { SITE_DESCRIPTION, SITE_TITLE } from '../../../consts';
+import { buildNoteTree, countTreeNotes, getTopLevelDirs } from '../../../utils/notes';
+
+export async function getStaticPaths() {
+	const entries = await getCollection('notes');
+	const subjects = getTopLevelDirs(buildNoteTree(entries));
+	return subjects.map((subject) => ({
+		params: { subject: subject.path },
+		props: { subjectName: subject.name, subjectPath: subject.path },
+	}));
+}
+
+const { subjectName, subjectPath } = Astro.props;
+const entries = await getCollection('notes');
+const subjectTree = getTopLevelDirs(buildNoteTree(entries)).find((subject) => subject.path === subjectPath);
+const subjectNodes = subjectTree?.children ?? [];
+---
+
+<BasePage title={`${subjectName} — ${SITE_TITLE}`} description={SITE_DESCRIPTION}>
+	<section class="rounded-[2rem] border border-white/10 bg-zinc-900/50 p-8 shadow-2xl shadow-black/20 backdrop-blur-xl md:p-10">
+		<a class="text-sm font-medium text-zinc-500 no-underline hover:text-violet-200" href="/notes/">← 返回学科列表</a>
+		<p class="mt-6 text-xs font-medium uppercase tracking-[0.28em] text-zinc-500">Subject</p>
+		<div class="mt-3 flex flex-wrap items-end justify-between gap-4">
+			<h1 class="text-3xl font-semibold tracking-[-0.04em] text-white md:text-4xl">{subjectName}</h1>
+			<span class="rounded-full border border-white/10 bg-white/[0.06] px-4 py-2 text-sm font-medium text-zinc-300">
+				{countTreeNotes(subjectNodes)} 篇笔记
+			</span>
+		</div>
+	</section>
+
+	<section class="mt-5 rounded-[2rem] border border-white/10 bg-zinc-900/50 p-5 shadow-2xl shadow-black/20 backdrop-blur-xl md:p-6">
+		<NoteTree nodes={subjectNodes} />
+	</section>
+</BasePage>
+

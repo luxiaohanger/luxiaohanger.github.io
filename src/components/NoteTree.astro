@@ -1,0 +1,125 @@
+---
+import type { NoteTreeNode } from '../utils/notes';
+
+interface Props {
+	nodes: NoteTreeNode[];
+	currentHref?: string;
+	level?: number;
+}
+
+const { nodes, currentHref = '', level = 0 } = Astro.props;
+const normalize = (href: string) => href.replace(/\/+$/, '');
+const containsCurrent = (node: NoteTreeNode): boolean => {
+	if (node.type === 'note') return normalize(node.href) === normalize(currentHref);
+	return node.children.some(containsCurrent);
+};
+---
+
+<ul class:list={['note-tree', level === 0 ? 'root' : 'nested']}>
+	{
+		nodes.map((node) => {
+			if (node.type === 'dir') {
+				return (
+					<li class="tree-dir">
+						<details open={level < 1 || containsCurrent(node)}>
+							<summary>
+								<span class="toggle-mark" aria-hidden="true"></span>
+								<span>{node.name}</span>
+							</summary>
+							<Astro.self nodes={node.children} currentHref={currentHref} level={level + 1} />
+						</details>
+					</li>
+				);
+			}
+
+			const active = normalize(node.href) === normalize(currentHref);
+			return (
+				<li class="tree-note">
+					<a class:list={{ active }} href={node.href} aria-current={active ? 'page' : undefined}>
+						{node.name}
+					</a>
+				</li>
+			);
+		})
+	}
+</ul>
+
+<style>
+	.note-tree {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+	.note-tree.nested {
+		margin-left: 0.75rem;
+		padding-left: 0.75rem;
+		border-left: 1px solid var(--line);
+	}
+	.tree-dir + .tree-dir,
+	.tree-dir + .tree-note,
+	.tree-note + .tree-dir,
+	.tree-note + .tree-note {
+		margin-top: 0.15rem;
+	}
+	summary {
+		display: flex;
+		align-items: center;
+		gap: 0.45rem;
+		cursor: pointer;
+		border-radius: 0.85rem;
+		padding: 0.42rem 0.55rem;
+		color: var(--muted);
+		font-size: 0.9rem;
+		font-weight: 650;
+		line-height: 1.35;
+		transition:
+			background 160ms ease,
+			color 160ms ease;
+	}
+	summary::-webkit-details-marker {
+		display: none;
+	}
+	summary:hover {
+		background: var(--tree-hover);
+		color: var(--tree-strong);
+	}
+	summary::marker {
+		content: '';
+	}
+	.toggle-mark {
+		display: inline-grid;
+		place-items: center;
+		width: 1rem;
+		color: var(--accent);
+		font-size: 0.78rem;
+		transition: transform 160ms ease;
+	}
+	.toggle-mark::before {
+		content: '▸';
+	}
+	details[open] > summary .toggle-mark {
+		transform: rotate(90deg);
+	}
+	.tree-note a {
+		display: block;
+		border-radius: 0.85rem;
+		padding: 0.38rem 0.55rem;
+		color: var(--muted);
+		font-size: 0.86rem;
+		line-height: 1.42;
+		text-decoration: none;
+		transition:
+			background 160ms ease,
+			color 160ms ease,
+			transform 160ms ease;
+	}
+	.tree-note a:hover {
+		background: var(--tree-hover);
+		color: var(--tree-strong);
+		transform: translateX(2px);
+	}
+	.tree-note a.active {
+		background: var(--tree-active-bg);
+		color: var(--tree-active-text);
+	}
+</style>

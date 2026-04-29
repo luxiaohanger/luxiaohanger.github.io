@@ -1,0 +1,38 @@
+---
+import { type CollectionEntry, getCollection, render } from 'astro:content';
+import NotePost from '../../layouts/NotePost.astro';
+import { buildNoteTree, getNoteHref, getNoteTitle, getSubjectFromEntry, getTopLevelDirs } from '../../utils/notes';
+
+export async function getStaticPaths() {
+	const notes = await getCollection('notes');
+	return notes.map((note) => ({
+		params: { slug: note.id.replace(/\.(md|mdx)$/i, '') },
+		props: note,
+	}));
+}
+
+type Props = CollectionEntry<'notes'>;
+
+const note = Astro.props;
+const allNotes = await getCollection('notes');
+const { Content } = await render(note);
+const title = getNoteTitle(note);
+const description = note.data.description?.trim() ?? '';
+const subjectPath = getSubjectFromEntry(note);
+const subjectTree = getTopLevelDirs(buildNoteTree(allNotes)).find((subject) => subject.path === subjectPath);
+const noteTree = subjectTree?.children ?? [];
+const currentHref = getNoteHref(note);
+const subjectName = subjectTree?.name ?? 'Notebook';
+const subjectHref = subjectTree ? `/notes/${subjectTree.path}/` : '/notes/';
+---
+
+<NotePost
+	title={title}
+	description={description}
+	noteTree={noteTree}
+	currentHref={currentHref}
+	subjectHref={subjectHref}
+	subjectName={subjectName}
+>
+	<Content />
+</NotePost>

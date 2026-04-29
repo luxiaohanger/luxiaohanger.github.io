@@ -15,10 +15,16 @@ const isActive = href === pathname || href === '/' + (subpath?.[0] || '');
 <style>
 	a {
 		display: inline-block;
+		border-radius: 999px;
+		padding: 0.55rem 0.85rem;
 		text-decoration: none;
+		color: var(--muted);
+		font-size: 0.95rem;
+		line-height: 1;
 	}
 	a.active {
-		font-weight: bolder;
-		text-decoration: underline;
+		color: var(--accent-strong);
+		background: rgba(139, 94, 52, 0.1);
+		font-weight: 700;
 	}
 </style>

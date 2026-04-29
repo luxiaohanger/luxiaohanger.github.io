@@ -1,16 +1,21 @@
 import { getCollection } from 'astro:content';
 import rss from '@astrojs/rss';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+import { getNoteHref, getNoteTitle } from '../utils/notes';
 
 export async function GET(context) {
-	const posts = await getCollection('blog');
+	const notes = await getCollection('notes');
+	const sorted = [...notes].sort((a, b) => getNoteTitle(a).localeCompare(getNoteTitle(b), 'zh-CN'));
 	return rss({
-		title: SITE_TITLE,
+		title: `${SITE_TITLE} — 笔记`,
 		description: SITE_DESCRIPTION,
 		site: context.site,
-		items: posts.map((post) => ({
-			...post.data,
-			link: `/blog/${post.id}/`,
+		items: sorted.map((note) => ({
+			title: getNoteTitle(note),
+			description: note.data.description?.trim() || '',
+			// 笔记文件无日期时，RSS 聚合器仍需要一个时间戳；可日后在 frontmatter 增加 pubDate
+			pubDate: new Date(0),
+			link: getNoteHref(note),
 		})),
 	});
 }

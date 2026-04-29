@@ -1,0 +1,149 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import NoteTree from '../components/NoteTree.astro';
+import type { NoteTreeNode } from '../utils/notes';
+
+interface Props {
+	/** 用于浏览器标签与 SEO；可与正文首个 # 标题一致 */
+	title: string;
+	description?: string;
+	noteTree?: NoteTreeNode[];
+	currentHref?: string;
+	subjectHref?: string;
+	subjectName?: string;
+}
+
+const {
+	title,
+	description = '',
+	noteTree = [],
+	currentHref = '',
+	subjectHref = '/notes/',
+	subjectName = 'Notebook',
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<BaseHead title={title} description={description} />
+		<style>
+			main {
+				width: min(1180px, calc(100% - 2rem));
+				margin: auto;
+				padding-top: 3rem;
+			}
+			.note-layout {
+				display: grid;
+				grid-template-columns: 240px minmax(0, var(--reading-width));
+				gap: 1.25rem;
+				align-items: start;
+				justify-content: center;
+			}
+			.note-sidebar {
+				position: sticky;
+				top: 5.5rem;
+				max-height: calc(100vh - 7rem);
+				overflow: auto;
+				padding: 1rem;
+				border: 1px solid var(--line);
+				border-radius: 1.5rem;
+				background: var(--card-bg);
+				backdrop-filter: blur(18px);
+			}
+			.note-sidebar-title {
+				margin: 0 0 0.75rem;
+				color: var(--subtle);
+				font-size: 0.72rem;
+				font-weight: 700;
+				letter-spacing: 0.18em;
+				text-transform: uppercase;
+			}
+			.note-shell {
+				padding: clamp(1.25rem, 4vw, 2.5rem);
+				background: var(--card-bg-strong);
+				border: 1px solid var(--line);
+				border-radius: 2rem;
+				box-shadow: var(--box-shadow);
+				backdrop-filter: blur(18px);
+				color: var(--muted);
+			}
+			.note-topline {
+				display: flex;
+				justify-content: space-between;
+				gap: 1rem;
+				margin-bottom: 1.5rem;
+				padding-bottom: 1rem;
+				border-bottom: 1px solid var(--line);
+				color: var(--muted);
+				font-size: 0.92rem;
+			}
+			.note-topline a {
+				font-weight: 700;
+				text-decoration: none;
+			}
+			.note-mobile-tree {
+				display: none;
+				margin-bottom: 1.25rem;
+				padding: 1rem;
+				border: 1px solid var(--line);
+				border-radius: 1.25rem;
+				background: var(--card-bg);
+			}
+			@media (max-width: 920px) {
+				main {
+					max-width: calc(100% - 1rem);
+					padding-top: 1rem;
+				}
+				.note-layout {
+					display: block;
+				}
+				.note-sidebar {
+					display: none;
+				}
+				.note-mobile-tree {
+					display: block;
+				}
+				.note-topline {
+					display: grid;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<div class="note-layout">
+				{
+					noteTree.length > 0 ? (
+						<aside class="note-sidebar" aria-label="笔记目录结构">
+							<p class="note-sidebar-title">{subjectName}</p>
+							<NoteTree nodes={noteTree} currentHref={currentHref} />
+						</aside>
+					) : (
+						<div></div>
+					)
+				}
+			<article class="note-shell prose">
+				<div class="note-topline">
+					<a href={subjectHref}>← 返回 {subjectName}</a>
+					<span>{title}</span>
+				</div>
+				{
+					noteTree.length > 0 ? (
+						<nav class="note-mobile-tree" aria-label="笔记目录结构">
+							<p class="note-sidebar-title">{subjectName}</p>
+							<NoteTree nodes={noteTree} currentHref={currentHref} />
+						</nav>
+					) : null
+				}
+				<!-- 正文内通常已有 Markdown 一级标题；此处不再重复输出 h1 -->
+				<slot />
+			</article>
+			</div>
+		</main>
+		<Footer />
+	</body>
+</html>

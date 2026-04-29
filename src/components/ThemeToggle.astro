@@ -1,0 +1,72 @@
+<button class="theme-toggle" type="button" aria-label="切换明暗主题" data-theme-toggle>
+	<span class="theme-icon light" aria-hidden="true">☀</span>
+	<span class="theme-icon dark" aria-hidden="true">☾</span>
+</button>
+
+<script>
+	const button = document.querySelector<HTMLButtonElement>('[data-theme-toggle]');
+
+	function currentTheme() {
+		return document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
+	}
+
+	function updateButton() {
+		if (!button) return;
+		const theme = currentTheme();
+		button.setAttribute('aria-label', theme === 'dark' ? '切换到浅色主题' : '切换到深色主题');
+	}
+
+	button?.addEventListener('click', () => {
+		const next = currentTheme() === 'dark' ? 'light' : 'dark';
+		document.documentElement.dataset.theme = next;
+		try {
+			localStorage.setItem('theme', next);
+		} catch {
+			// 浏览器禁用本地存储时仍允许临时切换当前页面主题。
+		}
+		updateButton();
+	});
+
+	updateButton();
+</script>
+
+<style>
+	.theme-toggle {
+		display: inline-grid;
+		place-items: center;
+		position: relative;
+		width: 2.2rem;
+		height: 2.2rem;
+		border: 1px solid var(--line);
+		border-radius: 999px;
+		background: var(--control-bg);
+		color: var(--muted);
+		cursor: pointer;
+		transition:
+			color 160ms ease,
+			background 160ms ease,
+			transform 160ms ease;
+	}
+	.theme-toggle:hover {
+		color: var(--text);
+		transform: translateY(-1px);
+	}
+	.theme-icon {
+		position: absolute;
+		font-size: 1rem;
+		line-height: 1;
+		transition:
+			opacity 160ms ease,
+			transform 160ms ease;
+	}
+	html[data-theme='dark'] .theme-icon.light,
+	html[data-theme='light'] .theme-icon.dark {
+		opacity: 1;
+		transform: scale(1);
+	}
+	html[data-theme='dark'] .theme-icon.dark,
+	html[data-theme='light'] .theme-icon.light {
+		opacity: 0;
+		transform: scale(0.75);
+	}
+</style>

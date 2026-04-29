@@ -1,0 +1,61 @@
+---
+import BasePage from '../../layouts/BasePage.astro';
+import { getCollection } from 'astro:content';
+import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
+import { buildNoteTree, countTreeNotes, getNoteCategory, getTopLevelDirs } from '../../utils/notes';
+
+const entries = await getCollection('notes');
+const tree = buildNoteTree(entries);
+const subjects = getTopLevelDirs(tree);
+const categories = [...new Set(entries.map(getNoteCategory))].sort((a, b) => a.localeCompare(b, 'zh-CN'));
+---
+
+<BasePage title={`笔记 — ${SITE_TITLE}`} description={SITE_DESCRIPTION}>
+	<section class="rounded-[2rem] border border-white/10 bg-zinc-900/50 p-8 shadow-2xl shadow-black/20 backdrop-blur-xl md:p-12">
+		<p class="mb-4 text-xs font-medium uppercase tracking-[0.28em] text-zinc-500">Notebook</p>
+		<h1 class="text-4xl font-semibold tracking-[-0.05em] text-white md:text-5xl">个人笔记</h1>
+		<div class="mt-6 flex flex-wrap gap-3">
+			<span class="rounded-full border border-white/10 bg-white/[0.06] px-4 py-2 text-sm font-medium text-zinc-300">{entries.length} 篇笔记</span>
+			<span class="rounded-full border border-white/10 bg-white/[0.06] px-4 py-2 text-sm font-medium text-zinc-300">{categories.length} 个分类</span>
+		</div>
+	</section>
+
+	{
+		categories.length === 0 ? (
+			<p class="mt-5 rounded-[2rem] border border-white/10 bg-zinc-900/50 p-6 text-zinc-400 backdrop-blur-xl">暂无笔记。</p>
+		) : (
+			<section class="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+				{
+					subjects.map((subject) => {
+						const childDirs = subject.children.filter((child) => child.type === 'dir').slice(0, 4);
+						return (
+							<a
+								class="group block rounded-[2rem] border border-white/10 bg-zinc-900/50 p-6 no-underline shadow-2xl shadow-black/20 backdrop-blur-xl transition duration-300 hover:scale-[1.02] hover:bg-zinc-900/70"
+								href={`/notes/${subject.path}/`}
+							>
+								<div>
+									<h2 class="text-xl font-semibold tracking-tight text-white">{subject.name}</h2>
+									<p class="mt-3 text-sm leading-6 text-zinc-400">包含 {countTreeNotes(subject.children)} 篇笔记</p>
+								</div>
+								{
+									childDirs.length > 0 ? (
+										<div class="mt-5 flex flex-wrap gap-2">
+											{childDirs.map((dir) => (
+												<span class="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-zinc-400">
+													{dir.name}
+												</span>
+											))}
+										</div>
+									) : null
+								}
+								<span class="mt-6 inline-flex text-sm font-medium text-violet-200 transition group-hover:translate-x-1">
+									查看目录 →
+								</span>
+							</a>
+						);
+					})
+				}
+			</section>
+		)
+	}
+</BasePage>

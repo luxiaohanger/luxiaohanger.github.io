@@ -1,5 +1,7 @@
-// Place any global data in this file.
-// You can import this data from anywhere in your site by using the `import` keyword.
+import { profile } from './data/profile';
 
-export const SITE_TITLE = 'Astro Blog';
-export const SITE_DESCRIPTION = 'Welcome to my website!';
+/** 全站标题：默认取 profile.displayName，可在 src/data/profile.ts 填写 */
+export const SITE_TITLE = profile.displayName.trim() || '我的个人主页';
+
+/** 全站摘要：默认取 profile.headline */
+export const SITE_DESCRIPTION = profile.headline.trim() || '个人主页与学习笔记';
