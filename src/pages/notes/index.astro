@@ -2,9 +2,9 @@
 import BasePage from '../../layouts/BasePage.astro';
 import { getCollection } from 'astro:content';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
-import { buildNoteTree, countTreeNotes, getNoteCategory, getTopLevelDirs } from '../../utils/notes';
+import { buildNoteTree, countTreeNotes, getNoteCategory, getTopLevelDirs, isRenderableNote } from '../../utils/notes';
 
-const entries = await getCollection('notes');
+const entries = (await getCollection('notes')).filter(isRenderableNote);
 const tree = buildNoteTree(entries);
 const subjects = getTopLevelDirs(tree);
 const categories = [...new Set(entries.map(getNoteCategory))].sort((a, b) => a.localeCompare(b, 'zh-CN'));

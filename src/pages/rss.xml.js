@@ -1,10 +1,10 @@
 import { getCollection } from 'astro:content';
 import rss from '@astrojs/rss';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
-import { getNoteHref, getNoteTitle } from '../utils/notes';
+import { getNoteHref, getNoteTitle, isRenderableNote } from '../utils/notes';
 
 export async function GET(context) {
-	const notes = await getCollection('notes');
+	const notes = (await getCollection('notes')).filter(isRenderableNote);
 	const sorted = [...notes].sort((a, b) => getNoteTitle(a).localeCompare(getNoteTitle(b), 'zh-CN'));
 	return rss({
 		title: `${SITE_TITLE} — 笔记`,

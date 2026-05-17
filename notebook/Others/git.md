@@ -33,6 +33,7 @@ git push origin <branch-name>
 git branch           # 本地分支  
 git branch -r        # 远程分支  
 git branch -a        # 所有分支
+git branch -m master main # 分支改名
 
 2.创建和切换分支  
 git branch <new-branch>  

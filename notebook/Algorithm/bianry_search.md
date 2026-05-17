@@ -43,3 +43,61 @@ return -1;
 
 利用这一特点，从矩阵左上角开始查询，每次查询都能排除一行或一列元素，时间复杂度为 O(n + m)
 
+# 三分查找
+适用于探索元素排列单调性变化
+
+比较区间端点值判断单调性
+
+
+- 在传递给函数之前，`nums` 在预先未知的某个下标 `k（0 <= k < nums.length）`上进行了 `向左旋转`，使数组变为 `[nums[k], nums[k+1], ..., nums[n-1], nums[0], nums[1], ..., nums[k-1]]`（下标 从 0 开始 计数）。例如， `[0,1,2,4,5,6,7]` 下标 `3` 上向左旋转后可能变为 `[4,5,6,7,0,1,2]` 。
+
+- 给你 `旋转后` 的数组 `nums` 和一个整数 `target` ，如果 `nums` 中存在这个目标值 `target` ，则返回它的下标，否则返回 -1 
+
+
+```cpp
+// 先三分查找旋转位置
+int search(vector<int>& nums, int target) {
+    int n = nums.size();
+    int l = 0;
+    int r = n - 1;
+    int begin = 0;
+    if (nums[l] > nums[r]) {
+      // 提前退出，否则 l m1 m2 r的值会重叠
+        while (l < r - 2) {
+            int m1 = l + (r - l) / 3;
+            int m2 = l + 2 * (r - l) / 3;
+            if (nums[l] < nums[m1] && nums[m1] < nums[m2]) {
+                l = m2;
+            } else if (nums[l] < nums[m1] && nums[m1] > nums[m2]) {
+                l = m1;
+                r = m2;
+            } else {
+                r = m1;
+            }
+        }
+
+        if (l == r - 1)
+            begin = r;
+        else if (l == r - 2) {
+            if (nums[l] < nums[l + 1])
+                begin = r;
+            else
+                begin = l + 1;
+        }
+    }
+
+    //映射到新数组二分
+    int left = 0;
+    int right = n - 1;
+    while (left <= right) {
+        int m = (left + right) / 2;
+        int mid = (begin + m) % n;
+        if (nums[mid] == target)
+            return mid;
+        else if (nums[mid] > target)
+            right = m - 1;
+        else
+            left = m + 1;
+    }
+    return -1;
+}```

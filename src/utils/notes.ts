@@ -22,6 +22,11 @@ export function getNoteTitle(entry: CollectionEntry<'notes'>): string {
 	return id.split('/').pop() ?? id;
 }
 
+/** 根目录 README 作为 notebook 说明文件，不进入站点笔记列表与路由 */
+export function isRenderableNote(entry: CollectionEntry<'notes'>): boolean {
+	return stripExt(entry.id).toLowerCase() !== 'readme';
+}
+
 /** 用于首页分组：取路径第一段目录名；顶层文件归为「其他」 */
 export function getNoteCategory(entry: CollectionEntry<'notes'>): string {
 	const id = stripExt(entry.id);

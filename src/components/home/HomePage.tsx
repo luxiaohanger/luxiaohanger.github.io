@@ -11,6 +11,11 @@ type Profile = {
 		mastodon?: string;
 		twitter?: string;
 	};
+	repositoryLinks?: {
+		name: string;
+		description?: string;
+		href: string;
+	}[];
 };
 
 type HomePageProps = {
@@ -23,6 +28,7 @@ export default function HomePage({ profile }: HomePageProps) {
 	const intro = profile.bioParagraphs.filter(Boolean);
 	const github = profile.socialLinks.github;
 	const email = profile.email?.trim();
+	const repositories = profile.repositoryLinks?.filter((repo) => repo.href.trim()) ?? [];
 
 	return (
 		<div className="space-y-5">
@@ -97,20 +103,31 @@ export default function HomePage({ profile }: HomePageProps) {
 					</div>
 				</BentoCard>
 
-				<BentoCard className="flex flex-col justify-between lg:col-span-5" id="projects">
+				<BentoCard className="flex flex-col justify-between lg:col-span-5">
 					<div>
-						<p className="text-sm uppercase tracking-[0.24em] text-zinc-500">Projects</p>
-						<h2 className="mt-3 text-xl font-semibold tracking-tight text-white">个人项目</h2>
-						<p className="mt-5 text-sm leading-7 text-zinc-400">
-							这里会逐步整理个人项目、实验性作品和阶段性实践。目前先保留入口，方便后续继续补充。
-						</p>
+						<p className="text-sm uppercase tracking-[0.24em] text-zinc-500">GitHub</p>
+						<h2 className="mt-3 text-xl font-semibold tracking-tight text-white">仓库链接</h2>
+						{repositories.length ? (
+							<div className="mt-5 grid gap-3">
+								{repositories.map((repo) => (
+									<a
+										key={repo.href}
+										className="block rounded-2xl border border-white/10 bg-white/[0.04] p-4 no-underline transition hover:border-white/20 hover:bg-white/[0.08]"
+										href={repo.href}
+										target="_blank"
+										rel="noreferrer"
+									>
+										<span className="text-sm font-semibold text-zinc-100">{repo.name}</span>
+										{repo.description ? <span className="mt-2 block text-sm leading-6 text-zinc-400">{repo.description}</span> : null}
+									</a>
+								))}
+							</div>
+						) : (
+							<p className="mt-5 text-sm leading-7 text-zinc-400">
+								在 src/data/profile.ts 的 repositoryLinks 中填写仓库链接后，这里会显示项目入口。
+							</p>
+						)}
 					</div>
-					<a
-						className="mt-8 inline-flex w-fit items-center justify-center rounded-full border border-white/10 bg-white/[0.06] px-4 py-2 text-sm font-medium text-zinc-100 no-underline transition hover:border-white/20 hover:bg-white/[0.1] hover:text-white"
-						href="#projects"
-					>
-						项目规划
-					</a>
 				</BentoCard>
 			</section>
 

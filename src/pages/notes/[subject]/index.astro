@@ -3,10 +3,10 @@ import BasePage from '../../../layouts/BasePage.astro';
 import NoteTree from '../../../components/NoteTree.astro';
 import { getCollection } from 'astro:content';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../../../consts';
-import { buildNoteTree, countTreeNotes, getTopLevelDirs } from '../../../utils/notes';
+import { buildNoteTree, countTreeNotes, getTopLevelDirs, isRenderableNote } from '../../../utils/notes';
 
 export async function getStaticPaths() {
-	const entries = await getCollection('notes');
+	const entries = (await getCollection('notes')).filter(isRenderableNote);
 	const subjects = getTopLevelDirs(buildNoteTree(entries));
 	return subjects.map((subject) => ({
 		params: { subject: subject.path },
@@ -15,7 +15,7 @@ export async function getStaticPaths() {
 }
 
 const { subjectName, subjectPath } = Astro.props;
-const entries = await getCollection('notes');
+const entries = (await getCollection('notes')).filter(isRenderableNote);
 const subjectTree = getTopLevelDirs(buildNoteTree(entries)).find((subject) => subject.path === subjectPath);
 const subjectNodes = subjectTree?.children ?? [];
 ---

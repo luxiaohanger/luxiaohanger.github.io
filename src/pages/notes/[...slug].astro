@@ -1,10 +1,10 @@
 ---
 import { type CollectionEntry, getCollection, render } from 'astro:content';
 import NotePost from '../../layouts/NotePost.astro';
-import { buildNoteTree, getNoteHref, getNoteTitle, getSubjectFromEntry, getTopLevelDirs } from '../../utils/notes';
+import { buildNoteTree, getNoteHref, getNoteTitle, getSubjectFromEntry, getTopLevelDirs, isRenderableNote } from '../../utils/notes';
 
 export async function getStaticPaths() {
-	const notes = await getCollection('notes');
+	const notes = (await getCollection('notes')).filter(isRenderableNote);
 	return notes.map((note) => ({
 		params: { slug: note.id.replace(/\.(md|mdx)$/i, '') },
 		props: note,
@@ -14,7 +14,7 @@ export async function getStaticPaths() {
 type Props = CollectionEntry<'notes'>;
 
 const note = Astro.props;
-const allNotes = await getCollection('notes');
+const allNotes = (await getCollection('notes')).filter(isRenderableNote);
 const { Content } = await render(note);
 const title = getNoteTitle(note);
 const description = note.data.description?.trim() ?? '';
